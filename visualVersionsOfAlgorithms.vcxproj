@@ -134,6 +134,8 @@
     <ClCompile Include="visualVersionsOfAlgorithms.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="advanceSort.h" />
+    <ClInclude Include="linearSort.h" />
     <ClInclude Include="listAdjacency.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
