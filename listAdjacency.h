@@ -48,7 +48,7 @@ public:
 	string* getVertexLabel();
 	void setVertexLabel(int vertex, string vertexLabel);
 	vector<int> adjacentNodes(int node);
-	int getV();
+	const int getV();
 	vector<int> dijkstra(int start, int end);
 };
 

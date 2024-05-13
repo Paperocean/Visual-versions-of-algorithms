@@ -18,7 +18,7 @@
 		delete[] list;
 	}
 
-	int ListAdjacency::getV() {
+	const int ListAdjacency::getV() {
 		return V;
 	}
 

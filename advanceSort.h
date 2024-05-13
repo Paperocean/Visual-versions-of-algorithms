@@ -2,11 +2,28 @@
 #define ADVANCESORT_H
 
 #include <iostream>
+#include <vector>
+#include <SFML/Graphics.hpp>
+
 using namespace std;
+
+int delay = 10;
+
+void drawArray(sf::RenderWindow& window, const std::vector<int>& arr) {
+	window.clear(sf::Color::Black);
+	int barWidth = window.getSize().x / arr.size();
+	for (size_t i = 0; i < arr.size(); i++) {
+		sf::RectangleShape bar(sf::Vector2f(barWidth - 1, -arr[i] * 5));
+		bar.setPosition(i * barWidth, window.getSize().y);
+		bar.setFillColor(sf::Color::White);
+		window.draw(bar);
+	}
+	window.display();
+}
 
 class AdvanceSort {
 public:
-	void merge(int arr[], int temp[], int start, int mid, int end) {
+	void merge(sf::RenderWindow& window, int arr[], int temp[], int start, int mid, int end) {
 		int i = start, j = mid + 1, k = 0;
 
 		while (i <= mid && j <= end) {
@@ -16,13 +33,25 @@ public:
 			else {
 				temp[k++] = arr[j++];
 			}
+
+			std::vector<int> vec(arr, arr + end + 1);
+			drawArray(window, vec);
+			sf::sleep(sf::milliseconds(delay)); // Delay to visualize the sorting
 		}
 
 		while (i <= mid) {
 			temp[k++] = arr[i++];
+
+			std::vector<int> vec(arr, arr + end + 1);
+			drawArray(window, vec);
+			sf::sleep(sf::milliseconds(delay)); // Delay to visualize the sorting
 		}
 		while (j <= end) {
 			temp[k++] = arr[j++];
+
+			std::vector<int> vec(arr, arr + end + 1);
+			drawArray(window, vec);
+			sf::sleep(sf::milliseconds(delay)); // Delay to visualize the sorting
 		}
 
 		for (int i = start; i <= end; i++) {
@@ -32,12 +61,15 @@ public:
 		delete[] temp;
 	}
 
-	void mergeSort(int arr[], int start, int end) {
-		int *temp = new int[end - start + 1];
-		int mid = (start + end) / 2;
-		mergeSort(arr, start, mid);
-		mergeSort(arr, mid + 1, end);
-		merge(arr, temp, start, mid, end);
+
+	void mergeSort(sf::RenderWindow& window, int arr[], int start, int end) {
+		if (start < end) {
+			int* temp = new int[end - start + 1];
+			int mid = (start + end) / 2;
+			mergeSort(window, arr, start, mid);
+			mergeSort(window, arr, mid + 1, end);
+			merge(window, arr, temp, start, mid, end);
+		}
 	}
 
 	void quickSort(int arr[], int start, int end) {
