@@ -4,30 +4,26 @@
 #include <queue>
 #include <limits>
 #include <algorithm>
+#include <cmath>
 
 #include "listAdjacency.h"
 #include "advanceSort.h"
 #include "linearSort.h"
 #include "basicTraversal.h"
+#include "graph.h"
 using namespace std;
-
-
-//void drawArray(sf::RenderWindow& window, const std::vector<int>& arr) {
-//    window.clear(sf::Color::Black);
-//    int barWidth = window.getSize().x / arr.size();
-//    float barHeight = window.getSize().y / *max_element(arr.begin(), arr.end());
-//    for (size_t i = 0; i < arr.size(); i++) {
-//        sf::RectangleShape bar(sf::Vector2f(barWidth - 1, -arr[i] * barHeight));
-//        bar.setPosition(i * barWidth, barHeight);
-//        bar.setFillColor(sf::Color::White);
-//        window.draw(bar);
-//    }
-//    window.display();
-//}
 
 void visualizeSort(sf::RenderWindow& window, std::vector<int>& arr) {
     AdvanceSort sort;
     sort.mergeSort(window, arr.data(), 0, arr.size() - 1);
+    //sort.quickSort(window, arr.data(), 0, arr.size() - 1);
+    //sort.bucketSort(window, arr.data(), arr.size());
+}
+
+void visualizeTraversal(sf::RenderWindow& window, std::vector<int>& arr) {
+	BasicTraversal traversal;
+    //traversal.linearTraversal(window, arr.data(), arr.size());
+    //traversal.binaryTraversal(window, arr.data(), arr.size());
 }
 
 void handleEvents(sf::RenderWindow& window, sf::View& view, sf::Vector2f& oldPos, bool& dragging) {
@@ -77,62 +73,71 @@ void handleEvents(sf::RenderWindow& window, sf::View& view, sf::Vector2f& oldPos
     }
 }
 
-void drawGraph(sf::RenderWindow& window, const std::vector<int>& path, ListAdjacency& list, int destination) {
-    std::vector<sf::Color> colors(list.getV(), sf::Color::White);
-    std::vector<int> distances = path;
+struct Node {
+    sf::CircleShape shape;
+    sf::Text label;
+};
 
-    colors[0] = sf::Color::Green;
-    colors[24] = sf::Color::Red;
-
-    float xStep = window.getSize().x / (destination + 1);
-
+void drawGraph(sf::RenderWindow& window, const std::vector<int>& path, int destination) {
     sf::Font font;
     if (!font.loadFromFile("arial.ttf")) {
         std::cerr << "Could not load font" << std::endl;
         exit(1);
     }
 
+    std::vector<Node> nodes(destination + 1);
+    std::vector<int> distances = path;
+
+    // Determine the radius of the circle enclosing the graph
+    float radius = std::min(window.getSize().x, window.getSize().y) / 4.0f;
+
+    float angleStep = 2 * 3.14 / destination;
+    sf::Vector2f center(window.getSize().x / 2, window.getSize().y / 2);
+
+    // Create nodes and labels
     for (int i = 0; i <= destination; i++) {
-        sf::CircleShape centerNode(10.f);
-        centerNode.setPosition(window.getSize().x / 2 - centerNode.getRadius(), window.getSize().y / 2 - centerNode.getRadius());
-        centerNode.setFillColor(sf::Color::Green);
-        window.draw(centerNode);
+        float angle = i * angleStep;
+        sf::Vector2f position(center.x + radius * cos(angle), center.y + radius * sin(angle));
 
-        float angleStep = 2 * 3.14159f / destination;
-        for (int i = 1; i <= destination; i++) {
-            sf::CircleShape node(10.f);
-            float radius = i * 20.f; // Change this value to adjust the distance between nodes
-            float angle = i * angleStep;
-            node.setPosition(window.getSize().x / 2 + radius * cos(angle) - node.getRadius(), window.getSize().y / 2 + radius * sin(angle) - node.getRadius());
-            node.setFillColor(colors[i]);
-            window.draw(node);
+        nodes[i].shape.setRadius(20.f); // Adjust node radius
+        if (std::find(path.begin(), path.end(), i) != path.end())
+            nodes[i].shape.setFillColor(sf::Color::Green); // Highlight path
+        else if (i == 0)
+            nodes[i].shape.setFillColor(sf::Color::Red); // Source node
+        else if (i == destination)
+            nodes[i].shape.setFillColor(sf::Color::Blue); // Destination node
+        else
+            nodes[i].shape.setFillColor(sf::Color::White); // Default color)
+        nodes[i].shape.setPosition(position.x - nodes[i].shape.getRadius(), position.y - nodes[i].shape.getRadius());
 
-            sf::Vertex line[] =
-            {
-                sf::Vertex(sf::Vector2f(centerNode.getPosition().x + centerNode.getRadius(), centerNode.getPosition().y + centerNode.getRadius())),
-                sf::Vertex(sf::Vector2f(node.getPosition().x + node.getRadius(), node.getPosition().y + node.getRadius()))
-            };
-            window.draw(line, 2, sf::Lines);
+        nodes[i].label.setFont(font);
+        nodes[i].label.setCharacterSize(20); // Adjust font size
+        nodes[i].label.setFillColor(sf::Color::Black);
+        nodes[i].label.setString(std::to_string(distances[i]));
+        nodes[i].label.setOrigin(nodes[i].label.getLocalBounds().width / 2, nodes[i].label.getLocalBounds().height / 2);
+        nodes[i].label.setPosition(position);
 
-            sf::Text text;
-            text.setFont(font);
-            text.setString(std::to_string(distances[i]));
-            text.setCharacterSize(10);
-            text.setFillColor(sf::Color::Magenta);
-            text.setPosition(node.getPosition().x + node.getRadius(), node.getPosition().y + node.getRadius());
-            window.draw(text);
-        }
+        window.draw(nodes[i].shape);
+        window.draw(nodes[i].label);
+    }
+
+    // Connect nodes with lines
+    for (int i = 0; i < destination; i++) {
+        sf::Vertex line[] = {
+            sf::Vertex(nodes[i].shape.getPosition() + sf::Vector2f(nodes[i].shape.getRadius(), nodes[i].shape.getRadius())),
+            sf::Vertex(nodes[i + 1].shape.getPosition() + sf::Vector2f(nodes[i + 1].shape.getRadius(), nodes[i + 1].shape.getRadius()))
+        };
+        window.draw(line, 2, sf::Lines);
     }
 }
 
-int main()
-{
+int main() {
     sf::RenderWindow window(sf::VideoMode(800, 600), "GRAPH VISUAL");
 
-    ListAdjacency list(100);
     int source = 0;
     int destination = 24;
 
+    ListAdjacency list(100);
     for (int i = 0; i < 100; i++) {
         list.addEdge(i, (i + 1) % 100, i);
     }
@@ -151,7 +156,44 @@ int main()
 
     while (window.isOpen())
     {
-        handleEvents(window, view, oldPos, dragging);
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+            if (event.type == sf::Event::MouseButtonPressed)
+            {
+                if (event.mouseButton.button == sf::Mouse::Left)
+                {
+                    dragging = true;
+                    oldPos = window.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+                }
+            }
+            else if (event.type == sf::Event::MouseButtonReleased)
+            {
+                if (event.mouseButton.button == sf::Mouse::Left)
+                    dragging = false;
+            }
+			else if (event.type == sf::Event::MouseMoved)
+			{
+				if (dragging)
+				{
+					const sf::Vector2f newPos = window.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
+					const sf::Vector2f delta = oldPos - newPos;
+
+					view.move(delta);
+					oldPos = window.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
+				}
+			}
+			else if (event.type == sf::Event::MouseWheelScrolled)
+			{
+				if (event.mouseWheelScroll.delta > 0)
+					view.zoom(0.9f);
+				else if (event.mouseWheelScroll.delta < 0)
+					view.zoom(1.1f);
+			}
+        }
 
         if (dragging)
         {
@@ -164,11 +206,10 @@ int main()
 
         window.clear();
 
-        //std::vector<int> path = list.dijkstra(source, destination);
-        //drawGraph(window, path, list, destination);
+        std::vector<int> path = list.dijkstra(source, destination);
+        drawGraph(window, path, destination);
 
-        visualizeSort(window, data);
-
+        //visualizeSort(window, data);
         window.setView(view);
         window.display();
     }

@@ -36,7 +36,7 @@ public:
 
 			std::vector<int> vec(arr, arr + end + 1);
 			drawArray(window, vec);
-			sf::sleep(sf::milliseconds(delay)); // Delay to visualize the sorting
+			sf::sleep(sf::milliseconds(delay));
 		}
 
 		while (i <= mid) {
@@ -44,14 +44,14 @@ public:
 
 			std::vector<int> vec(arr, arr + end + 1);
 			drawArray(window, vec);
-			sf::sleep(sf::milliseconds(delay)); // Delay to visualize the sorting
+			sf::sleep(sf::milliseconds(delay)); 
 		}
 		while (j <= end) {
 			temp[k++] = arr[j++];
 
 			std::vector<int> vec(arr, arr + end + 1);
 			drawArray(window, vec);
-			sf::sleep(sf::milliseconds(delay)); // Delay to visualize the sorting
+			sf::sleep(sf::milliseconds(delay));
 		}
 
 		for (int i = start; i <= end; i++) {
@@ -72,7 +72,7 @@ public:
 		}
 	}
 
-	void quickSort(int arr[], int start, int end) {
+	void quickSort(sf::RenderWindow& window, int arr[], int start, int end) {
 		if (start >= end) return;
 		int mid = (end + start) / 2;
 		int pivot = rand() % (end - start + 1) + start;
@@ -87,13 +87,21 @@ public:
 				i++;
 				j--;
 			}
+
+			std::vector<int> vec(arr, arr + end + 1);
+			drawArray(window, vec);
+			sf::sleep(sf::milliseconds(delay));
 		}
 
-		quickSort(arr, start, j);
-		quickSort(arr, i, end);
+		quickSort(window, arr, start, j);
+		quickSort(window, arr, i, end);
+
+		std::vector<int> vec(arr, arr + end + 1);
+		drawArray(window, vec);
+		sf::sleep(sf::milliseconds(delay));
 	}
 
-	void bucketSort(int arr[], int n) {
+	void bucketSort(sf::RenderWindow& window, int arr[], int n) {
 		int max = arr[0];
 
 		for (int i = 1; i < n; i++) {
@@ -109,9 +117,13 @@ public:
 		}
 
 		for (int i = 0, j = 0; i <= max; i++) {
-			while (bucket[i] > 0) {
+			while (bucket[i] >= 0) {
 				arr[i] = i;
 				bucket[i]--;
+
+				std::vector<int> vec(arr, arr + n);
+				drawArray(window, vec);
+				sf::sleep(sf::milliseconds(delay));
 			}
 		}
 
