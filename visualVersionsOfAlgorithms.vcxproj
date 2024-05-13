@@ -135,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="advanceSort.h" />
+    <ClInclude Include="basicTraversal.h" />
     <ClInclude Include="linearSort.h" />
     <ClInclude Include="listAdjacency.h" />
   </ItemGroup>
